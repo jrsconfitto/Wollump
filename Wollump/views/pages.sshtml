@@ -1,0 +1,6 @@
+﻿<h1>Pages</h1>
+<ul>
+	@Each
+	<li><a href="/page/@Current">@Current</a></li>
+	@EndEach
+<ul>

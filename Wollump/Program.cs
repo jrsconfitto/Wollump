@@ -10,7 +10,6 @@
         {
             if (args.Length > 0)
             {
-
                 try
                 {
                     using (Repository repo = new Repository(args[0]))
