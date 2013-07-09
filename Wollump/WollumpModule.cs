@@ -1,6 +1,7 @@
 ﻿namespace Wollump
 {
     using LibGit2Sharp;
+    using MarkdownSharp;
     using Nancy;
     using System;
     using System.IO;
@@ -10,7 +11,7 @@
     {
         private string[] indexPages = { "Home", "Readme", "Index" };
 
-        public WollumpModule(Repository repo)
+        public WollumpModule(Repository repo, Markdown md)
         {
             Get["/"] = _ =>
             {
@@ -22,7 +23,8 @@
                         .Select(t => t.Target)
                         .First();
 
-                    return repo.Lookup<Blob>(indexFile.Id).ContentAsUtf8().ToString();
+                    var indexContent = repo.Lookup<Blob>(indexFile.Id).ContentAsUtf8();
+                    return md.Transform(indexContent);
                 }
                 else
                 {
