@@ -111,10 +111,26 @@
 
             foreach (Match match in matches)
             {
-                string linkHref = HttpUtility.UrlEncode(match.Groups[2].Value);
-                string linkText = match.Groups[2].Value;
+                string externalFormat = @"<a href=""{0}"">{1}</a>";
+                string internalFormat = @"<a href=""/page/{0}"">{1}</a>";
+                string replacement, linkHref, linkText;
 
-                string replacement = string.Format(@"<a href=""/page/{0}"">{1}</a>", linkHref, linkText);
+                var split = match.Groups[2].Value.Split(new char[] { '|' });
+                if (split.Length > 1)
+                {
+                    // Probably external link
+                    linkText = split[0];
+                    linkHref = split[1];
+                    replacement = string.Format(externalFormat, linkHref, linkText);
+                }
+                else
+                {
+                    // Probably internal link
+                    linkText = match.Groups[2].Value;
+                    linkHref = HttpUtility.UrlEncode(match.Groups[2].Value);
+                    replacement = string.Format(internalFormat, linkHref, linkText);
+                }
+
                 content = content.Replace(match.Value.Trim(), replacement);
             }
 
