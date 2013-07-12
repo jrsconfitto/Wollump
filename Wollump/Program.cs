@@ -3,6 +3,7 @@
     using LibGit2Sharp;
     using Nancy.Hosting.Self;
     using System;
+    using System.Diagnostics;
 
     public class Program
     {
@@ -25,6 +26,8 @@
 
                         // Output to the console
                         Console.WriteLine("Hosting application at " + uri.ToString());
+                        Console.WriteLine("Launching the host url in your browser...");
+                        Process.Start(uri.ToString());
                         Console.ReadLine();
 
                         // Stop hosting
