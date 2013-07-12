@@ -113,15 +113,24 @@
             {
                 string externalFormat = @"<a href=""{0}"">{1}</a>";
                 string internalFormat = @"<a href=""/page/{0}"">{1}</a>";
-                string replacement, linkHref, linkText;
+                string replacement, replacementFormat, linkHref, linkText;
 
                 var split = match.Groups[2].Value.Split(new char[] { '|' });
                 if (split.Length > 1)
                 {
-                    // Probably external link
                     linkText = split[0];
                     linkHref = split[1];
-                    replacement = string.Format(externalFormat, linkHref, linkText);
+                    
+                    if (linkHref.Contains("http"))
+                    {
+                        replacementFormat = externalFormat;
+                    }
+                    else
+                    {
+                        replacementFormat = internalFormat;
+                    }
+
+                    replacement = string.Format(replacementFormat, linkHref, linkText);
                 }
                 else
                 {
