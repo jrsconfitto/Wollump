@@ -1,0 +1,11 @@
+﻿@{
+    Layout = "_Layout.cshtml";
+}
+
+@section title {
+	@Model.Name
+}
+    
+@section content {
+	@Html.Raw(Model.Content);
+}

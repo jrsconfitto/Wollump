@@ -1,8 +1,0 @@
-﻿<html>
-  <head>
-    <title>@Model.Name</title>
-  </head>
-  <body>
-    <div>@Model.Content</div>
-  </body>
-</html>

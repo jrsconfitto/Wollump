@@ -1,0 +1,16 @@
+﻿@{
+    Layout = "_Layout.cshtml";
+}
+
+@section title {
+	All pages
+}
+    
+@section content {
+<ul>
+	@foreach (var link in Model)
+    {
+        <li><a href="/page/@link">@link</a></li>
+    }
+</ul>
+}
