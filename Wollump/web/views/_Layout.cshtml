@@ -2,23 +2,40 @@
 <!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
 <!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
 <!--[if IE 8]>         <html class="no-js lt-ie9"> <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js"> <!--<![endif]-->
-    <head>
-        <meta charset="utf-8">
-        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-        <title>@RenderSection("title")</title>
-        <meta name="description" content="">
-        <meta name="viewport" content="width=device-width">
+<!--[if gt IE 8]><!-->
+<html class="no-js">
+<!--<![endif]-->
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <title>@RenderSection("title")</title>
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width">
 
-        <link type="text/css" href="/css/pure-min.css">
+    <link rel="stylesheet" type="text/css" href="/css/pure-min.css">
 
-        @RenderSection("styles", false)
-    </head>
-    <body>
+    @RenderSection("styles", false)
+</head>
+<body>
+    <section class="header">
+        <div class="pure-menu pure-menu-open pure-menu-horizontal">
+            <a href="#" class="pure-menu-heading">Wollump</a>
+
+            <ul>
+                <li><a href="/">Home</a></li>
+                <li><a href="/pages">Pages</a></li>
+            </ul>
+        </div>
+    </section>
+
+    <div class="main">
         @RenderSection("content")
+    </div>
 
-        <scripts>
+    <section class="footer">
+    </section>
+    <scripts>
             @RenderSection("scripts", false)
         </scripts>
-    </body>
+</body>
 </html>
