@@ -3,6 +3,7 @@
     using LibGit2Sharp;
     using MarkdownSharp;
     using Nancy;
+    using System;
 
     public class WollumpBootstrapper : DefaultNancyBootstrapper
     {
@@ -23,5 +24,15 @@
             container.Register(_repo);
             container.Register(_md);
         }
+
+#if DEBUG
+        protected override IRootPathProvider RootPathProvider
+        {
+            get
+            {
+                return new DebugRootPathProvider();
+            }
+        }
+#endif
     }
 }
