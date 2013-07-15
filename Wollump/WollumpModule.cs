@@ -62,6 +62,41 @@
                 }
             };
 
+            Get["/edit/{page}"] = parameters =>
+            {
+                string page = HttpUtility.UrlDecode(parameters.page).Replace(" ", "-");
+
+                var pageEntry = repo.Head.Tip.Tree
+                    .Where(t =>
+                        Path.GetFileNameWithoutExtension(t.Name).ToLowerInvariant() == page.ToLowerInvariant() &&
+                        HasRenderableExtension(t.Name))
+                    .Select(t => t.Target)
+                    .FirstOrDefault();
+
+                if (pageEntry != null)
+                {
+                    return View["edit", ModelForBlobId(pageEntry.Id, page, false)];
+                }
+                else
+                {
+                    return page + " doesn't exist. Maybe create it?";
+                }
+            };
+
+            Post["/edit/{page}"] = parameters =>
+            {
+                // Now we're going to write stuff into the repository
+                string content;
+                string message;
+                if (Request.Form.content && Request.Form.message)
+                {
+                    content = Request.Form.content;
+                    message = Request.Form.message;
+                }
+
+                return HttpStatusCode.OK;
+            };
+
             Get["/{pages}"] = _ =>
             {
                 var validPages = repo.Head.Tip.Tree
@@ -70,17 +105,18 @@
 
                 return View["pages", validPages.ToArray()];
             };
-
         }
 
-        private PageModel ModelForBlobId(ObjectId blobId, string name = "Home")
+        private PageModel ModelForBlobId(ObjectId blobId, string name = "Home", bool render = true)
         {
             var content = _repo.Lookup<Blob>(blobId).ContentAsUtf8();
+
+            if (render) content = RenderContent(content);
 
             return new PageModel()
             {
                 Name = name,
-                Content = RenderContent(content)
+                Content = content
             };
         }
 
@@ -120,7 +156,7 @@
                 {
                     linkText = split[0];
                     linkHref = split[1];
-                    
+
                     if (linkHref.Contains("http"))
                     {
                         replacementFormat = externalFormat;

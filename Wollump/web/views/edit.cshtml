@@ -6,6 +6,41 @@
     Edit @Model.Name
 }
 
+@section styles {
+    <style>
+        .page-content {
+            width: 100%;
+            height: 400px;
+        }
+    </style>
+}
+
 @section content {
-    @Model.Content
+    <div class="pure-g-r">
+        <div class="pure-u-1-1">
+            <form class="pure-form pure-form-stacked" method="post" action="/edit/@Model.Name">
+                <fieldset>
+                    <legend>Edit @Model.Name</legend>
+
+                    <div class="pure-g-r">
+                        <div class="pure-u-1-2">
+                            <label for="content">Content</label><br />
+                            <textarea class="page-content" name="content">@Model.Content</textarea>
+                        </div>
+                    </div>
+
+                    <div class="pure-g-r">
+                        <div class="pure-u-1-2">
+                            <label>
+                                Edit Summary <small>(Briefly describe the changes you have made)</small><br />
+                                <input type="text" class="text" name="message" />
+                            </label>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="pure-button pure-button-primary">Save page</button>
+                </fieldset>
+            </form>
+        </div>
+    </div>
 }
