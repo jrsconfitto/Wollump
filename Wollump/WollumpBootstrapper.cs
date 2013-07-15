@@ -3,6 +3,7 @@
     using LibGit2Sharp;
     using MarkdownSharp;
     using Nancy;
+    using Nancy.Conventions;
     using System;
 
     public class WollumpBootstrapper : DefaultNancyBootstrapper
@@ -23,6 +24,11 @@
             // Register the repo for the whole application
             container.Register(_repo);
             container.Register(_md);
+        }
+
+        protected override void ConfigureConventions(Nancy.Conventions.NancyConventions nancyConventions)
+        {
+            nancyConventions.StaticContentsConventions.Add(StaticContentConventionBuilder.AddDirectory("css", "content"));
         }
 
 #if DEBUG

@@ -9,7 +9,7 @@
         public string GetRootPath()
         {
             var appDirectory = Directory.GetParent(AppDomain.CurrentDomain.BaseDirectory);
-            var viewDirectory = Path.Combine(appDirectory.Parent.Parent.FullName, "views");
+            var viewDirectory = Path.Combine(appDirectory.Parent.Parent.FullName, "web");
             return viewDirectory;
         }
     }
