@@ -99,9 +99,6 @@
                             repo.Index.Stage(entryToUpdate.Path);
                             Signature committer = new Signature("James", "@jugglingnutcase", DateTime.Now);
                             Commit commit = repo.Commit(message, committer, committer);
-
-                            // Return the view
-                            return View["page", ModelForBlobId(EntryForPath(page).Target.Id, page)];
                         }
                     }
                     else
@@ -134,11 +131,13 @@
 
                             // Update the HEAD reference to point to the latest commit
                             repo.Refs.UpdateTarget(repo.Refs.Head, commit.Id);
-                            return View["page", ModelForBlobId(newBlob.Id, page)];
-
                         }
                     }
+
+                    // Return the view again
+                    return View["page", ModelForBlobId(EntryForPath(page).Target.Id, page)];
                 }
+
                 return HttpStatusCode.InternalServerError;
             };
 
