@@ -4,6 +4,7 @@
     using Nancy.Hosting.Self;
     using System;
     using System.Diagnostics;
+    using System.Net;
 
     public class Program
     {
@@ -33,6 +34,10 @@
                         // Stop hosting
                         nancyHost.Stop();
                     }
+                }
+                catch (HttpListenerException httpEx)
+                {
+                    Fail("Application failed to launch. There was an HTTP listener related error: " + httpEx.Message);
                 }
                 catch (Exception ex)
                 {
