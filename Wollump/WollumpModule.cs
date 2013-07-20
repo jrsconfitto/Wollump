@@ -89,13 +89,19 @@
                     if (!repo.Info.IsBare)
                     {
                         // Find the matching entry
-                        var entryToUpdate = repo.Index.FirstOrDefault(entry => Path.GetFileNameWithoutExtension(entry.Path) == page);
+                        var entryToUpdate = repo.Index
+                            .FirstOrDefault(entry => Path.GetFileNameWithoutExtension(entry.Path).ToLowerInvariant() == page.ToLowerInvariant());
+
                         if (entryToUpdate != null)
                         {
-                            // Add the content into the repository
-                            File.WriteAllText(entryToUpdate.Path, content);
-                            repo.Index.Stage(page);
-                            repo.Commit(message);
+                            // Write, stage, committer, commit
+                            File.WriteAllText(Path.Combine(repo.Info.WorkingDirectory, entryToUpdate.Path), content);
+                            repo.Index.Stage(entryToUpdate.Path);
+                            Signature committer = new Signature("James", "@jugglingnutcase", DateTime.Now);
+                            Commit commit = repo.Commit(message, committer, committer);
+
+                            // Return the view
+                            return View["page", ModelForBlobId(EntryForPath(page).Target.Id, page)];
                         }
                     }
                     else
@@ -128,12 +134,11 @@
 
                             // Update the HEAD reference to point to the latest commit
                             repo.Refs.UpdateTarget(repo.Refs.Head, commit.Id);
-
                             return View["page", ModelForBlobId(newBlob.Id, page)];
+
                         }
                     }
                 }
-
                 return HttpStatusCode.InternalServerError;
             };
 
