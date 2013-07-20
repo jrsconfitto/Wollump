@@ -45,16 +45,11 @@
             {
                 string page = HttpUtility.UrlDecode(parameters.page).Replace(" ", "-");
 
-                var pageEntry = repo.Head.Tip.Tree
-                    .Where(t =>
-                        Path.GetFileNameWithoutExtension(t.Name).ToLowerInvariant() == page.ToLowerInvariant() &&
-                        HasRenderableExtension(t.Name))
-                    .Select(t => t.Target)
-                    .FirstOrDefault();
+                var pageEntry = EntryForPath(page);
 
                 if (pageEntry != null)
                 {
-                    return View["page", ModelForBlobId(pageEntry.Id, page)];
+                    return View["page", ModelForBlobId(pageEntry.Target.Id, page)];
                 }
                 else
                 {
@@ -66,16 +61,11 @@
             {
                 string page = HttpUtility.UrlDecode(parameters.page).Replace(" ", "-");
 
-                var pageEntry = repo.Head.Tip.Tree
-                    .Where(t =>
-                        Path.GetFileNameWithoutExtension(t.Name).ToLowerInvariant() == page.ToLowerInvariant() &&
-                        HasRenderableExtension(t.Name))
-                    .Select(t => t.Target)
-                    .FirstOrDefault();
+                var pageEntry = EntryForPath(page);
 
                 if (pageEntry != null)
                 {
-                    return View["edit", ModelForBlobId(pageEntry.Id, page, false)];
+                    return View["edit", ModelForBlobId(pageEntry.Target.Id, page, false)];
                 }
                 else
                 {
@@ -86,15 +76,65 @@
             Post["/edit/{page}"] = parameters =>
             {
                 // Now we're going to write stuff into the repository
+                string page = parameters.page;
                 string content;
                 string message;
-                if (Request.Form.content && Request.Form.message)
+
+                if (Request.Form.content.HasValue && Request.Form.message.HasValue)
                 {
                     content = Request.Form.content;
                     message = Request.Form.message;
+
+                    // See if the repository is bare
+                    if (!repo.Info.IsBare)
+                    {
+                        // Find the matching entry
+                        var entryToUpdate = repo.Index.FirstOrDefault(entry => Path.GetFileNameWithoutExtension(entry.Path) == page);
+                        if (entryToUpdate != null)
+                        {
+                            // Add the content into the repository
+                            File.WriteAllText(entryToUpdate.Path, content);
+                            repo.Index.Stage(page);
+                            repo.Commit(message);
+                        }
+                    }
+                    else
+                    {
+                        var entryToUpdate = EntryForPath(page);
+                        if (entryToUpdate != null)
+                        {
+                            // Get the content into a BinaryReader somehow. This is total guesswork on my part.
+                            byte[] contentBytes = System.Text.Encoding.UTF8.GetBytes(content);
+                            MemoryStream ms = new MemoryStream(contentBytes);
+                            BinaryReader br = new BinaryReader(ms);
+
+                            // Sample from https://github.com/libgit2/libgit2sharp/blob/v0.9.0/LibGit2Sharp.Tests/ObjectDatabaseFixture.cs
+                            // needs to be cleaned up
+                            TreeDefinition td = TreeDefinition.From(repo.Head.Tip.Tree);
+                            Blob newBlob = repo.ObjectDatabase.CreateBlob(br);
+                            td.Add(entryToUpdate.Path, newBlob, Mode.NonExecutableFile);
+
+                            // Committer and author
+                            Signature committer = new Signature("James", "@jugglingnutcase", DateTime.Now);
+
+                            // Create binary stream from the text
+                            Tree tree = repo.ObjectDatabase.CreateTree(td);
+                            Commit commit = repo.ObjectDatabase.CreateCommit(
+                                message,
+                                committer,
+                                committer,
+                                tree,
+                                new[] { repo.Head.Tip });
+
+                            // Update the HEAD reference to point to the latest commit
+                            repo.Refs.UpdateTarget(repo.Refs.Head, commit.Id);
+
+                            return View["page", ModelForBlobId(newBlob.Id, page)];
+                        }
+                    }
                 }
 
-                return HttpStatusCode.OK;
+                return HttpStatusCode.InternalServerError;
             };
 
             Get["/{pages}"] = _ =>
@@ -105,6 +145,15 @@
 
                 return View["pages", validPages.ToArray()];
             };
+        }
+
+        private TreeEntry EntryForPath(string path)
+        {
+            return _repo.Head.Tip.Tree
+                .Where(t =>
+                    Path.GetFileNameWithoutExtension(t.Name).ToLowerInvariant() == path.ToLowerInvariant() &&
+                    HasRenderableExtension(t.Name))
+                .FirstOrDefault();
         }
 
         private PageModel ModelForBlobId(ObjectId blobId, string name = "Home", bool render = true)
